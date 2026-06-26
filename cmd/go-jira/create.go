@@ -11,16 +11,17 @@ import (
 	"github.com/trivago/tgo/tcontainer"
 )
 
-// newCreateCmd builds the `create` subcommand: create a Task issue. Equivalent
-// to the Python `create` subcommand, including epic-link and sprint custom
-// fields (configurable via --epic-field / --sprint-field).
+// newCreateCmd builds the `create` subcommand: create a Jira issue.
 func newCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create",
-		Short:   "Create a Task issue",
+		Short:   "Create a Jira issue",
 		GroupID: groupIssues,
 		Example: `  # Create a Task in a project
   go-jira create --project GAIA --summary "Investigate flaky test"
+
+  # Create a User Story
+  go-jira create --project GAIA --summary "As a user I want..." --issue-type "User Story"
 
   # Create with assignee, labels, and an epic link
   go-jira create --project GAIA --summary "Add retries" --assignee jdoe --labels backend,infra --epic GAIA-1
@@ -39,6 +40,7 @@ func newCreateCmd() *cobra.Command {
 	addCustomFieldFlags(cmd)
 	addEditableIssueFlags(cmd)
 	cmd.Flags().String(flagProject, "", "Project key, e.g. GAIA (required)")
+	cmd.Flags().String(flagIssueType, "Task", "Issue type, e.g. Task, Bug, \"User Story\" (env: ISSUE_TYPE / INPUT_ISSUE_TYPE)")
 	_ = cmd.MarkFlagRequired(flagProject)
 	_ = cmd.MarkFlagRequired(flagSummary)
 	return cmd
@@ -60,12 +62,13 @@ func runCreate(cmd *cobra.Command) error {
 	components, _ := cmd.Flags().GetString(flagComponents)
 	labels, _ := cmd.Flags().GetString(flagLabels)
 	epic, _ := cmd.Flags().GetString(flagEpic)
+	issueType, _ := cmd.Flags().GetString(flagIssueType)
 	sprint, _ := cmd.Flags().GetInt(flagSprint)
 	sprintSet := cmd.Flags().Changed(flagSprint)
 
 	fields := &jira.IssueFields{
 		Project:  jira.Project{Key: project},
-		Type:     jira.IssueType{Name: "Task"},
+		Type:     jira.IssueType{Name: issueType},
 		Summary:  summary,
 		Unknowns: tcontainer.NewMarshalMap(),
 	}

@@ -58,6 +58,7 @@ const (
 	flagLabels      = "labels"
 	flagEpic        = "epic"
 	flagSprint      = "sprint"
+	flagIssueType   = "issue-type"
 	flagKey         = "key"
 	flagBoardID     = "board-id"
 	flagState       = "state"
